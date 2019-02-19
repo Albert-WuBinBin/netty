@@ -13,6 +13,8 @@ import io.netty.channel.socket.nio.NioServerSocketChannel;
 import io.netty.handler.codec.DelimiterBasedFrameDecoder;
 import io.netty.handler.codec.string.StringDecoder;
 import io.netty.handler.codec.string.StringEncoder;
+import io.netty.handler.logging.LogLevel;
+import io.netty.handler.logging.LoggingHandler;
 
 public class NettyServer {
 
@@ -38,6 +40,7 @@ public class NettyServer {
 			serverBootstrap.group(bossGroup, workerGroup); //EventLoop目的是为Channel处理IO操作
 			serverBootstrap.childOption(ChannelOption.SO_BACKLOG, 128);//队列等待数
 			serverBootstrap.childOption(ChannelOption.SO_KEEPALIVE, true);//长连接
+			serverBootstrap.handler(new LoggingHandler(LogLevel.INFO));
 			/**
 			 * ChannelPipeline是ChannelHandler的容器，它负责ChannelHandler的管理和
 			 * 事件拦截与调度。Netty的ChannelPipeline和ChannelHandler机制类似于Servlet 
@@ -59,7 +62,7 @@ public class NettyServer {
 					/*
 					 * 拆包方式
 					 * 1.使用特殊字符，利用DelimiterBasedFrameDecoder进行拆包
-					 * 2.设置定长拆包，利用FixedLengthFrameDecoder进行拆包
+					 * 2.设置定长拆包，利用FixedLengthFrameDecoder进行拆包,不足的长度会丢失
 					 */
 					ByteBuf buf = Unpooled.copiedBuffer("$_".getBytes());
 					pipeline.addLast(new DelimiterBasedFrameDecoder(1024,buf));
@@ -67,6 +70,7 @@ public class NettyServer {
 					
 					pipeline.addLast(new StringDecoder());
 					pipeline.addLast(new StringEncoder());
+					
 					pipeline.addLast(new ServerHandler());
 				}
 			});

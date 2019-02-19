@@ -14,12 +14,28 @@ import io.netty.channel.ChannelInboundHandlerAdapter;
  * 2019年2月14日
  */
 public class ServerHandler extends ChannelInboundHandlerAdapter{
+	
+	
+
+	@Override
+	public void channelActive(ChannelHandlerContext ctx) throws Exception {
+		System.out.println("server active");
+	}
 
 	@Override
 	public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
-		String message = (String) msg;
-		System.out.println("收到数据"+message);
-		ctx.channel().writeAndFlush("hello,client$_hello,client2$_")
-		.addListener(ChannelFutureListener.CLOSE);//添加监听，关闭channel
+		if(msg instanceof String){
+			String message = (String) msg;
+			System.out.println("收到数据"+message);
+			ctx.channel().writeAndFlush("hello,client$_hello,client2$_")
+			.addListener(ChannelFutureListener.CLOSE);//添加监听，关闭channel
+		}
 	}
+
+	@Override
+	public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
+		cause.printStackTrace();
+		ctx.close();
+	}
+	
 }
